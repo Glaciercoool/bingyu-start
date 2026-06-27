@@ -1,0 +1,75 @@
+{
+  "source": "CVF Open Access CVPR 2026 main-conference day pages",
+  "generated_at": "2026-06-20",
+  "total_cvpr2026_main_papers": 4068,
+  "image_editing_related": 100,
+  "share_of_main_papers": 0.0246,
+  "candidate_audit_rows": 653,
+  "boundary_excluded": 553,
+  "by_cluster": {
+    "评测、数据与可信编辑": 9,
+    "概念擦除与模型治理": 6,
+    "直接编辑、修补与合成": 42,
+    "局部控制与条件引导": 4,
+    "身份、人像与虚拟试穿": 10,
+    "视频、多视图与3D编辑": 22,
+    "风格、纹理与外观编辑": 7
+  },
+  "by_method": {
+    "Benchmark / Evaluation": 7,
+    "Diffusion Model": 24,
+    "MLLM / Agent": 1,
+    "Title-level unknown / Other": 58,
+    "Diffusion Transformer": 4,
+    "Flow / Rectified Flow": 3,
+    "Score Distillation": 1,
+    "Latent Diffusion": 2
+  },
+  "by_modality": {
+    "多模态指令": 9,
+    "图像": 60,
+    "3D / 多视图": 5,
+    "视频": 19,
+    "人像 / 人体": 7
+  },
+  "by_relevance": {
+    "强相关": 79,
+    "中相关": 21
+  },
+  "by_priority": {
+    "Deep Read": 79,
+    "Skim -> Deep": 21
+  },
+  "by_day": {
+    "2026-06-05": 29,
+    "2026-06-06": 34,
+    "2026-06-07": 37
+  },
+  "day_urls": {
+    "2026-06-05": "https://openaccess.thecvf.com/CVPR2026?day=2026-06-05",
+    "2026-06-06": "https://openaccess.thecvf.com/CVPR2026?day=2026-06-06",
+    "2026-06-07": "https://openaccess.thecvf.com/CVPR2026?day=2026-06-07"
+  },
+  "abstracts_available": 102,
+  "methodology": {
+    "scope": "Image-editing-related CVPR 2026 papers were selected from the full CVF Open Access main-conference listing, not from the existing diffusion subset.",
+    "evidence_level": "Title-level triage; cached abstracts are retained for audit only and do not change inclusion decisions.",
+    "included_tasks": [
+      "instruction-guided image editing",
+      "retouching",
+      "inpainting",
+      "compositing",
+      "concept erasure",
+      "regional/local control",
+      "style/texture/appearance transfer",
+      "identity-preserving face or try-on editing",
+      "video/multiview/3D editing extensions",
+      "editing benchmarks, authorization, and trustworthy editing"
+    ],
+    "excluded_tasks": [
+      "pure image restoration/enhancement without edit intent",
+      "segmentation/classification/detection/tracking/retrieval",
+      "robotics/navigation/control tasks whose control is not image editing control"
+    ]
+  }
+}

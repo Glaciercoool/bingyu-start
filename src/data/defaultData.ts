@@ -1,0 +1,236 @@
+import type {
+  DockItem,
+  SearchEngineConfig,
+  SearchEngineId,
+  SiteItem,
+  StartPageData,
+} from '../types/startpage';
+
+export const APP_VERSION = '0.1.0';
+export const DATA_VERSION = 1;
+
+export const DEFAULT_WALLPAPERS = [
+  '/assets/wallpaper/pic1.jpg',
+  '/assets/wallpaper/pic2.jpg',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920',
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920',
+];
+
+export const SEARCH_ENGINES: Record<SearchEngineId, SearchEngineConfig> = {
+  baidu: {
+    id: 'baidu',
+    name: '百度',
+    shortcut: 'Alt+1',
+    icon: '/assets/搜索/baidu.svg',
+    searchUrl: 'https://www.baidu.com/s?wd={query}',
+  },
+  bing: {
+    id: 'bing',
+    name: '必应',
+    shortcut: 'Alt+2',
+    icon: '/assets/搜索/bing.svg',
+    searchUrl: 'https://www.bing.com/search?q={query}',
+  },
+  google: {
+    id: 'google',
+    name: '谷歌',
+    shortcut: 'Alt+3',
+    icon: '/assets/搜索/google.svg',
+    searchUrl: 'https://www.google.com/search?q={query}',
+  },
+  yandex: {
+    id: 'yandex',
+    name: 'Yandex',
+    shortcut: 'Alt+4',
+    icon: '/assets/搜索/yandex.svg',
+    searchUrl: 'https://yandex.com/search/?text={query}',
+  },
+};
+
+export const DEFAULT_HITOKOTO = [
+  '生活明朗，万物可爱',
+  '前途是光明的，道路是曲折的',
+  '遇事不怒，基本吃素，多多散步，劳逸适度',
+  '不要嘲笑以前的自己，他当初一个人站在雾里也很迷茫',
+  '何必用必然的死亡，困住豁然的一生',
+];
+
+export const DEFAULT_SITES: SiteItem[] = [
+  {
+    id: 'default-notes',
+    name: '便签',
+    url: '#notes',
+    icon: 'notes',
+    color: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    group: '记录与绘图',
+    description: '快速记录想法与待办',
+    isSpecial: true,
+    isDefault: true,
+  },
+  {
+    id: 'default-research',
+    name: '科研',
+    url: '/research/index.html',
+    icon: 'research',
+    color: 'linear-gradient(135deg, #0ea5e9, #14b8a6)',
+    group: '科研',
+    description: '论文、报告与研究入口',
+    isDefault: true,
+  },
+  {
+    id: 'default-translate',
+    name: '翻译',
+    url: 'https://fanyi.youdao.com/#/TextTranslate',
+    icon: '/assets/ico/1.svg',
+    color: '#06b6d4',
+    group: '科研',
+    isDefault: true,
+  },
+  {
+    id: 'default-doubao',
+    name: '豆包',
+    url: 'https://www.doubao.com/chat/',
+    icon: '/assets/ico/doubao2.png',
+    color: 'linear-gradient(135deg, #10b981, #059669)',
+    group: 'AI',
+    isDefault: true,
+  },
+  {
+    id: 'default-openai',
+    name: 'OpenAI',
+    url: 'https://chatgpt.com',
+    icon: 'openai',
+    color: 'linear-gradient(135deg, #111827, #0f172a)',
+    group: 'AI',
+    isDefault: true,
+  },
+  {
+    id: 'default-github',
+    name: 'GitHub',
+    url: 'https://github.com',
+    icon: '/assets/ico/github.svg',
+    color: 'transparent',
+    group: '开发',
+    isDefault: true,
+  },
+  {
+    id: 'default-scholar',
+    name: 'Scholar',
+    url: 'https://scholar.google.com',
+    icon: '/assets/ico/Google scholar.svg',
+    color: 'transparent',
+    group: '科研',
+    isDefault: true,
+  },
+  {
+    id: 'default-bilibili',
+    name: 'Bilibili',
+    url: 'https://www.bilibili.com',
+    icon: '/assets/ico/bilibili.svg',
+    color: 'transparent',
+    group: '视频',
+    isDefault: true,
+  },
+  {
+    id: 'default-douyin',
+    name: '抖音',
+    url: 'https://www.douyin.com',
+    icon: '/assets/ico/douyin.svg',
+    color: 'transparent',
+    group: '视频',
+    isDefault: true,
+  },
+  {
+    id: 'default-netease',
+    name: '网易云音乐',
+    url: 'https://music.163.com',
+    icon: '/assets/ico/wangyiyun.svg',
+    color: 'transparent',
+    group: '生活',
+    isDefault: true,
+  },
+  {
+    id: 'default-qqmail',
+    name: 'QQ 邮箱',
+    url: 'https://mail.qq.com',
+    icon: '/assets/ico/qqemail.svg',
+    color: 'transparent',
+    group: '工作',
+    isDefault: true,
+  },
+];
+
+export const DEFAULT_DOCK_ITEMS: DockItem[] = [
+  {
+    id: 'dock-apps',
+    name: '应用',
+    icon: 'apps',
+    color: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    action: 'apps',
+    isDefault: true,
+  },
+  {
+    id: 'dock-research',
+    name: '科研',
+    icon: 'research',
+    color: 'linear-gradient(135deg, #0ea5e9, #14b8a6)',
+    url: '/research/index.html',
+    isDefault: true,
+  },
+  {
+    id: 'dock-notes',
+    name: '便签',
+    icon: 'notes',
+    color: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    action: 'notes',
+    isDefault: true,
+  },
+  {
+    id: 'dock-github',
+    name: 'GitHub',
+    icon: '/assets/ico/github.svg',
+    color: 'transparent',
+    url: 'https://github.com',
+    isDefault: true,
+  },
+  {
+    id: 'dock-theme',
+    name: '主题',
+    icon: 'theme',
+    color: 'linear-gradient(135deg, #1e1b4b, #312e81)',
+    action: 'theme',
+    isDefault: true,
+  },
+];
+
+export const DEFAULT_START_PAGE_DATA: StartPageData = {
+  settings: {
+    autoClear: true,
+    searchHistory: true,
+    showDock: true,
+    newTab: true,
+    themeColor: '#00d4ff',
+    darkMode: 'on',
+    vignette: true,
+    currentWallpaper: DEFAULT_WALLPAPERS[0],
+    customWallpapers: [],
+  },
+  sites: DEFAULT_SITES,
+  dockItems: DEFAULT_DOCK_ITEMS,
+  hitokotoList: DEFAULT_HITOKOTO,
+  notes: [
+    {
+      id: 'welcome-note',
+      title: '迁移记录',
+      content: '这里已经切到 React + TypeScript 版本。后续可以继续接云同步、收藏夹管理和科研组件。',
+      folderId: 'default',
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  folders: [{ id: 'default', name: '默认', collapsed: false }],
+  pinnedNoteIds: ['welcome-note'],
+  currentEngine: 'baidu',
+  searchHistoryData: [],
+};
