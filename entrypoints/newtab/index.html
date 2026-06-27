@@ -7968,7 +7968,10 @@
       'linear-gradient(150deg,#efeae0,#ddd6c4)',
       'linear-gradient(150deg,#e7efe9,#cfe0d6)'
     ];
-    const WEATHER_CACHE_MS = 15 * 60 * 1000;
+    const WEATHER_CACHE_MS = 60 * 60 * 1000; // 天气主体缓存 1 小时，减少新标签页重复调用
+    const WEATHER_GEO_CACHE_MS = 7 * 24 * 60 * 60 * 1000; // 城市/区县搜索结果缓存 7 天
+    const WEATHER_SEARCH_DEBOUNCE_MS = 650; // 城市搜索防抖，避免每个字都请求
+    const WEATHER_MIN_SEARCH_LENGTH = 2; // 少于 2 个字符不触发城市搜索
     // 和风天气 QWeather 配置：
     // 方式 1：直接在这里填写 QWEATHER_API_KEY（自己使用最快）。
     // 方式 2：在浏览器控制台设置 localStorage.setItem('QWEATHER_API_KEY', '你的Key')。
@@ -8925,6 +8928,8 @@
     }
 
     async function qWeatherLookupLocation(location, fallback = '天气') {
+      const cached = readWeatherGeoCache(location, 1);
+      if (cached) return cached;
       const cfg = getQWeatherConfig();
       const geo = await qWeatherFetch(cfg.geoHost, '/geo/v2/city/lookup', {
         location,
@@ -8933,23 +8938,27 @@
       });
       const loc = geo.location && geo.location[0];
       if (!loc) throw new Error('没有找到这个城市');
-      return {
+      const result = {
         id: loc.id,
         lat: Number(loc.lat),
         lon: Number(loc.lon),
         name: loc.name || fallback,
         place: qWeatherPlaceFromLocation(loc, fallback)
       };
+      writeWeatherGeoCache(location, 1, result);
+      return result;
     }
 
     async function qWeatherSearchLocations(location) {
+      const cached = readWeatherGeoCache(location, 8);
+      if (cached) return cached;
       const cfg = getQWeatherConfig();
       const geo = await qWeatherFetch(cfg.geoHost, '/geo/v2/city/lookup', {
         location,
         lang: 'zh',
         number: 8
       });
-      return (geo.location || []).map(loc => ({
+      const result = (geo.location || []).map(loc => ({
         id: loc.id,
         lat: Number(loc.lat),
         lon: Number(loc.lon),
@@ -8959,6 +8968,8 @@
         country: loc.country || '',
         place: qWeatherPlaceFromLocation(loc, location)
       }));
+      writeWeatherGeoCache(location, 8, result);
+      return result;
     }
 
     function normalizeQWeatherAirAqi(airRaw) {
@@ -9061,6 +9072,39 @@
       catch (_) { /* noop */ }
     }
 
+    function weatherGeoCacheKey(location, number = 8) {
+      const value = String(location || '').trim().toLowerCase();
+      if (!value) return '';
+      return `bingyu_weather_geo_cache_v1:${number}:${value}`;
+    }
+
+    function readWeatherGeoCache(location, number = 8) {
+      try {
+        const key = weatherGeoCacheKey(location, number);
+        if (!key) return null;
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const pack = JSON.parse(raw);
+        if (!pack || !pack.expiresAt || Date.now() > pack.expiresAt) {
+          localStorage.removeItem(key);
+          return null;
+        }
+        return pack.data || null;
+      } catch (_) { return null; }
+    }
+
+    function writeWeatherGeoCache(location, number = 8, data = null) {
+      try {
+        const key = weatherGeoCacheKey(location, number);
+        if (!key || !data) return;
+        localStorage.setItem(key, JSON.stringify({
+          updatedAt: Date.now(),
+          expiresAt: Date.now() + WEATHER_GEO_CACHE_MS,
+          data
+        }));
+      } catch (_) { /* noop */ }
+    }
+
     function weatherEntryKeyFromItem(item, data) {
       if (!item && !data) return '';
       if (item && item.weatherUseLocation) return '__location__';
@@ -9107,6 +9151,24 @@
       list.unshift(entry);
       writeWeatherSavedList(list);
       return true;
+    }
+
+    function updateWeatherListEntryIfExists(item, data) {
+      const freshEntry = buildWeatherListEntry(item, data);
+      if (!freshEntry) return false;
+      const list = readWeatherSavedList();
+      let changed = false;
+      const next = list.map(entry => {
+        if (!entry) return entry;
+        const sameLocation = freshEntry.weatherUseLocation && entry.weatherUseLocation;
+        const sameKey = freshEntry.key && entry.key && freshEntry.key === entry.key;
+        const samePlace = freshEntry.place && entry.place && freshEntry.place === entry.place;
+        if (!(sameLocation || sameKey || samePlace)) return entry;
+        changed = true;
+        return { ...entry, ...freshEntry, updatedAt: Date.now() };
+      });
+      if (changed) writeWeatherSavedList(next);
+      return changed;
     }
 
     function removeWeatherListEntry(entry) {
@@ -9185,8 +9247,16 @@
       const value = String(rawValue || '').trim();
       weatherSearchQuery = value;
       if (weatherSearchTimer) clearTimeout(weatherSearchTimer);
-      if (!value) {
+      const visibleLength = Array.from(value).length;
+      if (!value || visibleLength < WEATHER_MIN_SEARCH_LENGTH) {
         weatherSearchSuggestions = [];
+        weatherSearchLoading = false;
+        updateWeatherSuggestionBox();
+        return;
+      }
+      const cached = readWeatherGeoCache(value, 8);
+      if (cached) {
+        weatherSearchSuggestions = cached;
         weatherSearchLoading = false;
         updateWeatherSuggestionBox();
         return;
@@ -9194,10 +9264,22 @@
       weatherSearchLoading = true;
       updateWeatherSuggestionBox();
       weatherSearchTimer = setTimeout(async () => {
-        try { weatherSearchSuggestions = await qWeatherSearchLocations(value); }
-        catch (err) { console.warn('[Bingyu Weather] city suggestion failed:', err && err.message ? err.message : err); weatherSearchSuggestions = []; }
-        finally { weatherSearchLoading = false; updateWeatherSuggestionBox(); }
-      }, 260);
+        const queryAtRequest = value;
+        try {
+          const results = await qWeatherSearchLocations(queryAtRequest);
+          if (weatherSearchQuery === queryAtRequest) weatherSearchSuggestions = results;
+        }
+        catch (err) {
+          console.warn('[Bingyu Weather] city suggestion failed:', err && err.message ? err.message : err);
+          if (weatherSearchQuery === queryAtRequest) weatherSearchSuggestions = [];
+        }
+        finally {
+          if (weatherSearchQuery === queryAtRequest) {
+            weatherSearchLoading = false;
+            updateWeatherSuggestionBox();
+          }
+        }
+      }, WEATHER_SEARCH_DEBOUNCE_MS);
     }
 
     function clearWeatherSuggestions() {
@@ -9251,16 +9333,18 @@
         const data = cloneWeatherData(entry.weatherData);
         data.place = entry.place || data.place;
         item._weather = data;
-        item.weatherCache = { updatedAt: Date.now(), provider: data.source || 'QWeather', data };
+        // 关键：沿用保存列表的真实更新时间，不再把旧缓存伪装成“刚刚更新”。
+        item.weatherCache = { updatedAt: Number(entry.updatedAt || 0), provider: data.source || 'QWeather', data };
         item._weatherError = '';
         saveDesktopState();
         rerenderCell(item.id);
         renderWeatherDetail(item);
+        if (!weatherCacheIsFresh(item)) fetchWeather(item, true, { locate: false });
         return;
       }
       delete item.weatherCache;
       saveDesktopState();
-      fetchWeather(item, true);
+      fetchWeather(item, true, { locate: false });
     }
 
 
@@ -9505,6 +9589,7 @@
 
         item._weather = data;
         item.weatherCache = { updatedAt: Date.now(), provider: data.source || currentWeatherProviderLabel(), data };
+        updateWeatherListEntryIfExists(item, data);
         item._weatherError = '';
         saveDesktopState();
         rerenderCell(item.id);
