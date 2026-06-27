@@ -2060,7 +2060,7 @@
     function weatherPlaceShort(place) {
       const parts = normalizeWeatherPlaceParts(place);
       if (!parts.length) return '天气';
-      return parts[parts.length - 1].replace(/区$|市$|县$/g, '') || parts[0];
+      return parts[parts.length - 1] || parts[0];
     }
 
     function weatherPlaceTitle(place) {
@@ -2749,6 +2749,7 @@
       delete item.weatherCache;
       delete item.qweatherLocationId;
       clearWeatherSuggestions();
+      saveDesktopState();
       fetchWeather(item, true);
     }
 
@@ -2763,6 +2764,7 @@
       item.weatherUseLocation = false;
       delete item.weatherCache;
       clearWeatherSuggestions();
+      saveDesktopState();
       fetchWeather(item, true);
     }
 
@@ -2787,6 +2789,7 @@
         return;
       }
       delete item.weatherCache;
+      saveDesktopState();
       fetchWeather(item, true);
     }
 
@@ -3070,7 +3073,7 @@
       const w = item._weather;
       const displayPlace = weatherPlaceTitle((w && w.place) || item.place || item.city || '天气');
       const shortQueryPlace = weatherPlaceShort(displayPlace || item.city || '天气');
-      const queryValue = weatherSearchQuery || shortQueryPlace;
+      const queryValue = weatherSearchQuery || '';
       const topQuery = `<div class="dt-weather-query-wrap"><div class="dt-weather-query"><input type="text" data-weather-city-input placeholder="搜索城市、区县" value="${escapeHtml(queryValue)}" autocomplete="off"><button type="button" data-weather-locate title="定位当前位置">⌖</button><button type="button" data-weather-sidebar-toggle title="天气列表">☰</button></div><div class="dt-weather-search-popover" data-weather-suggestions>${renderWeatherSuggestionBox()}</div></div>`;
       document.getElementById('dtWeatherHead').textContent = '天气';
       if (!w) {
@@ -3203,9 +3206,8 @@
       clearWeatherSuggestions();
       document.getElementById('dtWeatherOverlay').classList.add('show');
       renderWeatherDetail(item);
-      const shouldLocate = !item.weatherUseLocation;
       const forceProviderRefresh = !weatherCacheIsFresh(item);
-      fetchWeather(item, shouldLocate || forceProviderRefresh, { locate: shouldLocate });
+      fetchWeather(item, forceProviderRefresh, { locate: false });
     }
 
     function closeWeatherDetail() {

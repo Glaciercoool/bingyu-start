@@ -1,1 +1,7 @@
 research/.cache/
+
+node_modules/
+.output/
+.wxt/
+*.zip
+fix-weather.js
