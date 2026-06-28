@@ -1,7 +1,5 @@
-research/.cache/
-
-node_modules/
+﻿node_modules/
 .output/
 .wxt/
 *.zip
-fix-weather.js
+.DS_Store
